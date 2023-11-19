@@ -11,7 +11,6 @@ def visualize_for_neuron(model: CNN, layer_name: str, neuron_idx: int, train_loa
 
     # get one image from train loader
     img, label = next(iter(train_loader))
-    img_pil = transforms.ToPILImage()(img.squeeze())
     img.requires_grad = True
 
     # Define optimizer
@@ -32,14 +31,13 @@ def visualize_for_neuron(model: CNN, layer_name: str, neuron_idx: int, train_loa
 
         # Backward pass
         loss.backward()
-
-        print("Iteration: {}, Loss: {}".format(i, loss.item()))
-
+        
         # Update the image
         optimizer.step()
 
     # Convert the optimized image to a numpy array
-    img_np = img.detach().squeeze().numpy()
+    img_pil = transforms.ToPILImage()(img.squeeze())
+
 
     # Visualize the optimized image
     plt.imshow(img_pil)
@@ -48,7 +46,7 @@ def visualize_for_neuron(model: CNN, layer_name: str, neuron_idx: int, train_loa
 
     # Save the optimized image if desired
     if save:
-        img_pil.save('optimized_image.jpg')
+        img_pil.save('./outputs/${neuron_idx}.jpg')
 
 if __name__ == '__main__':
     # Load the pre-trained model
@@ -63,6 +61,5 @@ if __name__ == '__main__':
                         ])),
         batch_size=1, shuffle=True)
 
-
     # Visualize the first neuron in the first convolutional layer
-    visualize_for_neuron(model, 'conv1', 1, train_loader, save=True)
+    visualize_for_neuron(model, 'conv1', 0, train_loader, save=True)
