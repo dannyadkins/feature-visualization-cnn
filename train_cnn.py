@@ -1,3 +1,4 @@
+import argparse
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -24,7 +25,7 @@ def train(model: CNN, train_loader: dataloader, num_epochs=5, lr=0.001, hyperpar
                 print('[%d, %5d] loss: %.3f' %
                     (epoch+1, i+1, running_loss / hyperparams['log_interval']))
                 running_loss = 0.0
-    print('Finished Training')
+
 
 def test(model: CNN, test_loader: dataloader):
     correct = 0
@@ -40,7 +41,7 @@ def test(model: CNN, test_loader: dataloader):
     print('Accuracy of the network on the 10000 test images: %d %%' % (
         100 * correct / total))
     
-def main():
+def main(train_model: bool, test_model: bool, load_model: bool, save_model):
     # small toy model 
     hyperparams = {
         'batch_size': 64,
@@ -51,7 +52,6 @@ def main():
         'no_cuda': True,
         'seed': 1,
         'log_interval': 100,
-        'save_model': True
     }
 
     # load data
@@ -71,8 +71,33 @@ def main():
         batch_size=hyperparams['test_batch_size'], shuffle=True)
 
     model = CNN()
-    train(model, train_loader, num_epochs=hyperparams['epochs'], lr=hyperparams['lr'], hyperparams=hyperparams)
-    test(model, test_loader)
+    if (load_model):
+        model.load_state_dict(torch.load("mnist_cnn.pt"))
+
+    if (train_model):
+        train(model, train_loader, num_epochs=hyperparams['epochs'], lr=hyperparams['lr'], hyperparams=hyperparams)
+    
+    if (test_model):
+        test(model, test_loader)
+    
+    if (save_model):
+        torch.save(model.state_dict(), "mnist_cnn.pt")
 
 if __name__ == "__main__":
-    main()
+
+    # collect args via argparse: load_model, train, test -L -T -t
+
+    argparser = argparse.ArgumentParser(description='Train CNN on MNIST dataset')
+    argparser.add_argument('-L', '--load_model', help='load model from file', action='store_true')
+    argparser.add_argument('-T', '--train', help='train model', action='store_true')
+    argparser.add_argument('-t', '--test', help='test model', action='store_true')
+    argparser.add_argument('-s', '--save', help='save model', action='store_true')
+
+    args = argparser.parse_args()
+
+    train_model = args.train
+    test_model = args.test
+    load_model = args.load_model
+    save_model = args.save
+
+    main(train_model, test_model, load_model, save_model)
