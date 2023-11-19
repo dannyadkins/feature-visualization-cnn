@@ -34,3 +34,38 @@ test_loader = dataloader.DataLoader(
                         transforms.Normalize((0.1307,), (0.3081,))
                     ])),
     batch_size=hyperparams['test_batch_size'], shuffle=True)
+
+def train(model, num_epochs=5, lr=0.001):
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.SGD(model.parameters(), lr=lr, momentum=0.9)
+    for epoch in range(num_epochs):
+        running_loss = 0.0
+        for i, data in enumerate(train_loader, 0):
+            inputs, labels = data
+            optimizer.zero_grad()
+            outputs = model(inputs)
+            loss = criterion(outputs, labels)
+            loss.backward()
+            optimizer.step()
+
+            running_loss += loss.item()
+            if i % hyperparams['log_interval'] == hyperparams['log_interval']-1:
+                print('[%d, %5d] loss: %.3f' %
+                    (epoch+1, i+1, running_loss / hyperparams['log_interval']))
+                running_loss = 0.0
+    print('Finished Training')
+
+def test(model):
+    correct = 0
+    total = 0
+    with torch.no_grad():
+        for data in test_loader:
+            inputs, labels = data
+            outputs = model(inputs)
+            _, predicted = torch.max(outputs.data, 1)
+            total += labels.size(0)
+            correct += (predicted == labels).sum().item()
+    
+    print('Accuracy of the network on the 10000 test images: %d %%' % (
+        100 * correct / total))
+
