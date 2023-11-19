@@ -28,3 +28,9 @@ train_loader = dataloader.DataLoader(
                     ])),
     batch_size=hyperparams['batch_size'], shuffle=True)
 
+test_loader = dataloader.DataLoader(
+    datasets.MNIST('./data', train=False, transform=transforms.Compose([
+                        transforms.ToTensor(),
+                        transforms.Normalize((0.1307,), (0.3081,))
+                    ])),
+    batch_size=hyperparams['test_batch_size'], shuffle=True)
