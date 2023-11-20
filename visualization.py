@@ -1,15 +1,15 @@
-import torch 
+import torch
 import torchvision.transforms as transforms
 import matplotlib.pyplot as plt
-from cnn import CNN 
+from cnn import CNN
 from torch.utils.data import dataloader
 from torchvision import datasets, transforms
 
-def visualize_for_neuron(model: CNN, layer_name: str, neuron_idx: int, train_loader, save: bool =False, num_iterations: int = 1000, lr = 0.01):
+def visualize_for_neuron(model: CNN, layer_name: str, neuron_idx: int, train_loader, save: bool = False, num_iterations: int = 1000, lr = 0.01, regularization_weight = 0.1):
     # Load the pre-trained model
     model.eval()
 
-    # get one image from train loader
+    # Get one image from train loader
     img, label = next(iter(train_loader))
     img.requires_grad = True
 
@@ -20,7 +20,7 @@ def visualize_for_neuron(model: CNN, layer_name: str, neuron_idx: int, train_loa
         # Zero the gradients
         optimizer.zero_grad()
 
-        # Forward pass of the model 
+        # Forward pass of the model
         output = model(img)
 
         # Get the activation of the specified layer for the specified neuron
@@ -29,15 +29,25 @@ def visualize_for_neuron(model: CNN, layer_name: str, neuron_idx: int, train_loa
         # Compute the loss as the negative activation
         loss = -activation
 
+        # Compute the total variation regularization term
+        tv_loss = regularization_weight * (
+            torch.sum(torch.abs(img[:, :, :, :-1] - img[:, :, :, 1:])) +
+            torch.sum(torch.abs(img[:, :, :-1, :] - img[:, :, 1:, :]))
+        )
+
+        # Add the regularization term to the loss
+        loss += tv_loss
+
         # Backward pass
         loss.backward()
-        
+
         # Update the image
         optimizer.step()
-
+        
+        if (i % 200 == 0):
+            print(f'Iteration: {i}, Loss: {loss.item()}')
     # Convert the optimized image to a numpy array
     img_pil = transforms.ToPILImage()(img.squeeze())
-
 
     # Visualize the optimized image
     plt.imshow(img_pil)
@@ -46,7 +56,7 @@ def visualize_for_neuron(model: CNN, layer_name: str, neuron_idx: int, train_loa
 
     # Save the optimized image if desired
     if save:
-        img_pil.save('./outputs/${neuron_idx}.jpg')
+        img_pil.save(f'./outputs/{neuron_idx}.jpg')
 
 if __name__ == '__main__':
     # Load the pre-trained model
@@ -62,4 +72,4 @@ if __name__ == '__main__':
         batch_size=1, shuffle=True)
 
     # Visualize the first neuron in the first convolutional layer
-    visualize_for_neuron(model, 'conv1', 0, train_loader, save=True)
+    visualize_for_neuron(model, 'conv1', 1, train_loader, save=True)
