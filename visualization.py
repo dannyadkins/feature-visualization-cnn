@@ -6,7 +6,7 @@ from torch.utils.data import dataloader
 from torchvision import datasets, transforms
 import argparse
 
-def visualize_for_neuron(model: CNN, layer_name: str, neuron_idx: int, train_loader, save: bool = False, num_iterations: int = 5000, lr = 0.01, regularization_weight = 0.05):
+def visualize_for_neuron(model: CNN, layer_name: str, neuron_idx: int, train_loader, save: bool = False, num_iterations: int = 10000, lr = 0.005, regularization_weight = 0.005):
     # Load the pre-trained model
     model.eval()
 
