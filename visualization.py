@@ -4,8 +4,9 @@ import matplotlib.pyplot as plt
 from cnn import CNN
 from torch.utils.data import dataloader
 from torchvision import datasets, transforms
+import argparse
 
-def visualize_for_neuron(model: CNN, layer_name: str, neuron_idx: int, train_loader, save: bool = False, num_iterations: int = 1000, lr = 0.01, regularization_weight = 0.1):
+def visualize_for_neuron(model: CNN, layer_name: str, neuron_idx: int, train_loader, save: bool = False, num_iterations: int = 5000, lr = 0.01, regularization_weight = 0.05):
     # Load the pre-trained model
     model.eval()
 
@@ -60,6 +61,10 @@ def visualize_for_neuron(model: CNN, layer_name: str, neuron_idx: int, train_loa
 
 if __name__ == '__main__':
     # Load the pre-trained model
+    # argparse neuron id or range of neuron ids:
+    
+    argparser = argparse.ArgumentParser(description='Visualize a specific neuron optimized input')
+
     model = CNN()
     model.load_state_dict(torch.load('mnist_cnn.pt'))
 
@@ -72,4 +77,5 @@ if __name__ == '__main__':
         batch_size=1, shuffle=True)
 
     # Visualize the first neuron in the first convolutional layer
-    visualize_for_neuron(model, 'conv1', 1, train_loader, save=True)
+    for i in range(10):
+        visualize_for_neuron(model, 'conv1', 1, train_loader, save=True)
