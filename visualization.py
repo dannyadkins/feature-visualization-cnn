@@ -6,7 +6,7 @@ from torch.utils.data import dataloader
 from torchvision import datasets, transforms
 import argparse
 
-def visualize_for_neuron(model: CNN, layer_name: str, neuron_idx: int, train_loader, save: bool = False, num_iterations: int = 10000, lr = 0.005, regularization_weight = 0.005):
+def visualize_for_neuron(model: CNN, layer_name: str, neuron_idx: int, train_loader, save: bool = False, num_iterations: int = 10000, lr = 0.005, regularization_weight = 0.01):
     # Load the pre-trained model
     model.eval()
 
@@ -77,5 +77,5 @@ if __name__ == '__main__':
         batch_size=1, shuffle=True)
 
     # Visualize the first neuron in the first convolutional layer
-    for i in range(10):
+    for i in range(50, 51):
         visualize_for_neuron(model, 'conv1', 1, train_loader, save=True)
